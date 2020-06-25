@@ -1,0 +1,34 @@
+	string destinaton = pdf_path;
+
+    Image MyImage = System.Drawing.Image.FromFile(image_path);
+
+    PdfDocument doc = new PdfDocument();
+
+    for (int PageIndex = 0; PageIndex < MyImage.GetFrameCount(System.Drawing.Imaging.FrameDimension.Page); PageIndex++)
+    {
+        MyImage.SelectActiveFrame(FrameDimension.Page, PageIndex);
+		System.IO.MemoryStream strm = new System.IO.MemoryStream();
+		MyImage.Save(strm, System.Drawing.Imaging.ImageFormat.Png);
+
+		XImage img = XImage.FromStream(strm);
+
+        var page = new PdfPage();
+
+        if (img.Width > img.Height)
+        {
+            page.Orientation = PageOrientation.Landscape;
+        }
+        else
+        {
+            page.Orientation = PageOrientation.Portrait;
+        }
+        doc.Pages.Add(page);
+
+        XGraphics xgr = XGraphics.FromPdfPage(doc.Pages[PageIndex]);
+
+        xgr.DrawImage(img, 0, 0);
+    }
+
+    doc.Save(destinaton);
+    doc.Close();
+    MyImage.Dispose();
